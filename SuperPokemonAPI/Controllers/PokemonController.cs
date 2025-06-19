@@ -50,7 +50,7 @@ namespace SuperPokemonAPI.Controllers
             if (!_pokemonRepository.PokemonExists(pokeId))
                 return NotFound(); // 404 
 
-            var pokemon = _mapper.Map<List<PokemonDto>>(_pokemonRepository.GetPokemon(pokeId));
+            var pokemon = _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokeId));
 
             if (!ModelState.IsValid)
             {

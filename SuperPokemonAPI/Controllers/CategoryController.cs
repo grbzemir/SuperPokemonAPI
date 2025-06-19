@@ -77,5 +77,46 @@ namespace SuperPokemonAPI.Controllers
 
             return Ok(pokemons);
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+
+        public IActionResult CreateCategory([FromBody] CategoryDto categoryCreate)
+        {
+            if (categoryCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Aynı Kategori var mı yok mu bunu kontrol et
+            var category = _categoryRepository.GetCategories()
+                 .Where(c => c.Name.Trim().ToUpper() == categoryCreate.Name.TrimEnd().ToUpper())
+                 .FirstOrDefault();
+
+            if (category != null)
+
+            {
+                ModelState.AddModelError("Name", "Category already exists");
+                return StatusCode(422, ModelState);
+            }
+           
+            //Dto daki dataAnnotations lara bakılır
+            if (!ModelState.IsValid) 
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Mapleme işlemi yapılıyor 
+            var categoryMap = _mapper.Map<Category>(categoryCreate);
+
+            if (!_categoryRepository.CreateCategory(categoryMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while saving the category");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created a category");
+        }
     }
  }
