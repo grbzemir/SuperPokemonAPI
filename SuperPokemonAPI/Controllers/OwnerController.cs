@@ -13,12 +13,13 @@ namespace SuperPokemonAPI.Controllers
     public class OwnerController : ControllerBase
     {
         private readonly IOwnerRepository _ownerRepository;
+        private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
-        public OwnerController(IOwnerRepository ownerRepository , IMapper mapper)
+        public OwnerController(IOwnerRepository ownerRepository , IMapper mapper, ICountryRepository countryRepository)
         {
             _ownerRepository = ownerRepository;
             _mapper = mapper;
-            
+            _countryRepository = countryRepository;
         }
 
         [HttpGet]
@@ -72,6 +73,48 @@ namespace SuperPokemonAPI.Controllers
             }
               
             return Ok(owner);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateOwner([FromQuery] int countryId, [FromBody] OwnerDto ownerCreate)
+        {
+            if (ownerCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Aynı Kategori var mı yok mu bunu kontrol et
+            var owners = _ownerRepository.GetOwners()
+                 .Where(c => c.Name.Trim().ToUpper() == ownerCreate.Name.TrimEnd().ToUpper())
+                 .FirstOrDefault();
+
+            if (owners != null)
+
+            {
+                ModelState.AddModelError("Name", "Owner already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            //Dto daki dataAnnotations lara bakılır
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Mapleme işlemi yapılıyor 
+            var ownerMap = _mapper.Map<Owner>(ownerCreate);
+
+            ownerMap.Country = _countryRepository.GetCountry(countryId);
+
+            if (!_ownerRepository.CreateOwner(ownerMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while saving the Owner");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created a Owner");
         }
     }
 }

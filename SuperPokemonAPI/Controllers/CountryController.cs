@@ -92,7 +92,7 @@ namespace SuperPokemonAPI.Controllers
             if (country != null)
 
             {
-                ModelState.AddModelError("Name", "Category already exists");
+                ModelState.AddModelError("Name", "Country already exists");
                 return StatusCode(422, ModelState);
             }
 
@@ -107,11 +107,11 @@ namespace SuperPokemonAPI.Controllers
 
             if (!_countryRepository.CreateCountry(countryMap))
             {
-                ModelState.AddModelError("Name", "Something went wrong while saving the category");
+                ModelState.AddModelError("Name", "Something went wrong while saving the Country");
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Successfully created a category");
+            return Ok("Successfully created a Country");
         }
     }
 }
