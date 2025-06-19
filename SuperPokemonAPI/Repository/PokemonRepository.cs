@@ -12,6 +12,31 @@ namespace SuperPokemonAPI.Repository
             _context = context;
         }
 
+        public bool CreatePokemon(int OwnerId, int categoryId, Pokemon pokemon)
+        {
+            var pokemonOwnerEntity = _context.Owners.Where(a=> a.Id == OwnerId).FirstOrDefault();
+            var category = _context.Categories.Where(a => a.Id == categoryId).FirstOrDefault();
+
+            var pokemonOwner = new PokemonOwner()
+            {
+                Owner = pokemonOwnerEntity,
+                Pokemon = pokemon
+            };
+
+            _context.Add(pokemonOwner);
+
+            var pokemonCategory = new PokemonCategory()
+            {
+                Category = category,
+                Pokemon = pokemon
+            };
+
+            _context.Add(pokemonCategory);
+
+            _context.Add(pokemon);
+            return Save();
+        }
+
         public Pokemon GetPokemon(int id)
         {
            return _context.Pokemons.Where(p => p.Id == id).FirstOrDefault();
@@ -40,6 +65,13 @@ namespace SuperPokemonAPI.Repository
         public bool PokemonExists(int pokeId)
         {
             return _context.Pokemons.Any(p => p.Id == pokeId);
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved > 0 ? true : false;
+
         }
     }
 }
