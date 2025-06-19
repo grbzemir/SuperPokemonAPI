@@ -12,7 +12,7 @@ using SuperPokemonAPI.Data;
 namespace SuperPokemonAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250619124132_InitialCreate")]
+    [Migration("20250619133015_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -144,6 +144,9 @@ namespace SuperPokemonAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("PokemonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
                         .HasColumnType("int");
 
                     b.Property<int>("ReviewerId")
