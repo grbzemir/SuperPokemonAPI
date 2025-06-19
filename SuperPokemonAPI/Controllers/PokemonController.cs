@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SuperPokemonAPI.Interfaces;
 using SuperPokemonAPI.Models;
 using SuperPokemonAPI.Dtos;
+using SuperPokemonAPI.Repository;
 
 namespace SuperPokemonAPI.Controllers
 {
@@ -78,6 +79,47 @@ namespace SuperPokemonAPI.Controllers
             }
 
             return Ok(rating);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreatePokemon([FromQuery] int ownerId, [FromQuery] int catId , [FromBody] PokemonDto pokemonCreate)
+        {
+            if (pokemonCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Aynı Kategori var mı yok mu bunu kontrol et
+            var pokemons = _pokemonRepository.GetPokemons()
+                 .Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper())
+                 .FirstOrDefault();
+
+            if (pokemons != null)
+
+            {
+                ModelState.AddModelError("Name", "Owner already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            //Dto daki dataAnnotations lara bakılır
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Mapleme işlemi yapılıyor 
+            var pokemonMap = _mapper.Map<Pokemon>(pokemonCreate);
+
+
+            if (!_pokemonRepository.CreatePokemon(ownerId,catId,pokemonMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while saving the Pokemon");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created a Pokemon");
         }
 
     }
