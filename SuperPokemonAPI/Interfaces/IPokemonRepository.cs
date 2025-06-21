@@ -11,7 +11,7 @@ namespace SuperPokemonAPI.Interfaces
         bool PokemonExists(int pokeId);
         bool CreatePokemon(int OwnerId , int categoryId , Pokemon pokemon);
         bool UpdatePokemon(int OwnerId , int categoryId , Pokemon pokemon);
-
+        bool DeletePokemon(Pokemon pokemon);
         bool Save();
 
 
