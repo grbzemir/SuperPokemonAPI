@@ -72,5 +72,46 @@ namespace SuperPokemonAPI.Controllers
             return Ok(reviews);
 
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReviewer([FromBody] ReviewerDto reviewerCreate)
+        {
+            if (reviewerCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Aynı Kategori var mı yok mu bunu kontrol et
+            var country = _reviewerRepository.GetReviewers()
+                 .Where(c => c.LastName.Trim().ToUpper() == reviewerCreate.LastName.TrimEnd().ToUpper())
+                 .FirstOrDefault();
+
+            if (country != null)
+
+            {
+                ModelState.AddModelError("Name", "Reviewer already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            //Dto daki dataAnnotations lara bakılır
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Mapleme işlemi yapılıyor 
+            var reviewerMap = _mapper.Map<Reviewer>(reviewerCreate);
+
+
+            if (!_reviewerRepository.CreateReviewer(reviewerMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while saving the Reviewer");
+                return StatusCode(500, ModelState);
+            }
+
+            return Ok("Successfully created a Reviewer");
+        }
     }
 }
