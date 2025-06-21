@@ -13,10 +13,12 @@ namespace SuperPokemonAPI.Controllers
     public class PokemonController : ControllerBase
     {
         private readonly IPokemonRepository _pokemonRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
-        public PokemonController(IPokemonRepository pokemonRepository , IMapper mapper)
+        public PokemonController(IPokemonRepository pokemonRepository , IMapper mapper , IReviewRepository  reviewRepository)
         {
             _pokemonRepository = pokemonRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
@@ -91,7 +93,7 @@ namespace SuperPokemonAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            //Aynı Kategori var mı yok mu bunu kontrol et
+            //Aynı Pokemon var mı yok mu bunu kontrol et
             var pokemons = _pokemonRepository.GetPokemons()
                  .Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper())
                  .FirstOrDefault();
@@ -120,6 +122,47 @@ namespace SuperPokemonAPI.Controllers
             }
 
             return Ok("Successfully created a Pokemon");
+        }
+
+        [HttpPut("{pokeId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult UpdatePokemon(int pokeId, [FromQuery] int ownerId , [FromQuery] int catId, [FromBody] PokemonDto updatedPokemon)
+        {
+            if (updatedPokemon == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (pokeId != updatedPokemon.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Pokemon var mı yok mu kontrollü
+            if (!_pokemonRepository.PokemonExists(pokeId))
+            {
+                return NotFound();
+            }
+
+            //DataAnnotations kontrolü
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var pokemonMap = _mapper.Map<Pokemon>(updatedPokemon);
+
+            if (!_pokemonRepository.UpdatePokemon(ownerId , catId , pokemonMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while updating the pokemon");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+
         }
 
     }

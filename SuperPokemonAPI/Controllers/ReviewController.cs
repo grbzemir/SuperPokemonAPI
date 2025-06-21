@@ -85,7 +85,7 @@ namespace SuperPokemonAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            //Aynı Kategori var mı yok mu bunu kontrol et
+            //Aynı Review var mı yok mu bunu kontrol et
             var reviews = _reviewRepository.GetReviews()
                  .Where(c => c.Title.Trim().ToUpper() == reviewCreate.Title.TrimEnd().ToUpper())
                  .FirstOrDefault();
@@ -117,6 +117,47 @@ namespace SuperPokemonAPI.Controllers
             }
 
             return Ok("Successfully created a Reviews");
+        }
+
+        [HttpPut("{reviewId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult UpdateReview(int reviewId, [FromBody] ReviewDto updatedReview)
+        {
+            if (updatedReview == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (reviewId != updatedReview.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Review var mı yok mu kontrollü
+            if (!_reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
+
+            //DataAnnotations kontrolü
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var reviewMap = _mapper.Map<Review>(updatedReview);
+
+            if (!_reviewRepository.UpdateReview(reviewMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while updating the review");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+
         }
     }
 }

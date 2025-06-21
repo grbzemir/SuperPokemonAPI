@@ -84,7 +84,7 @@ namespace SuperPokemonAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            //Aynı Kategori var mı yok mu bunu kontrol et
+            //Aynı Country var mı yok mu bunu kontrol et
             var country = _countryRepository.GetCountries()
                  .Where(c => c.Name.Trim().ToUpper() == countryCreate.Name.TrimEnd().ToUpper())
                  .FirstOrDefault();
@@ -114,7 +114,7 @@ namespace SuperPokemonAPI.Controllers
             return Ok("Successfully created a Country");
         }
 
-        [HttpPut("countryId")]
+        [HttpPut("{countryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -131,7 +131,7 @@ namespace SuperPokemonAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            //Kategori var mı yok mu kontrollü
+            //Country var mı yok mu kontrollü
             if (!_countryRepository.CountryExists(countryId))
             {
                 return NotFound();
@@ -147,7 +147,7 @@ namespace SuperPokemonAPI.Controllers
 
             if (!_countryRepository.UpdateCountry(countryMap))
             {
-                ModelState.AddModelError("Name", "Something went wrong while updating the category");
+                ModelState.AddModelError("Name", "Something went wrong while updating the country");
                 return StatusCode(500, ModelState);
             }
 

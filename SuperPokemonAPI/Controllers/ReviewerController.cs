@@ -113,5 +113,46 @@ namespace SuperPokemonAPI.Controllers
 
             return Ok("Successfully created a Reviewer");
         }
+
+        [HttpPut("{reviewerId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult UpdateReviewer(int reviewerId, [FromBody] ReviewerDto updatedReviewer)
+        {
+            if (updatedReviewer == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (reviewerId != updatedReviewer.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Reviewer var mı yok mu kontrollü
+            if (!_reviewerRepository.ReviewerExists(reviewerId))
+            {
+                return NotFound();
+            }
+
+            //DataAnnotations kontrolü
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var reviewerMap = _mapper.Map<Reviewer>(updatedReviewer);
+
+            if (!_reviewerRepository.UpdateReviewer(reviewerMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while updating the category");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+
+        }
     }
 }

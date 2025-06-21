@@ -119,7 +119,7 @@ namespace SuperPokemonAPI.Controllers
             return Ok("Successfully created a category");
         }
 
-        [HttpPut("categoryId")]
+        [HttpPut("{categoryId}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]

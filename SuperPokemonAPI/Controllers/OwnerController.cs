@@ -85,7 +85,7 @@ namespace SuperPokemonAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            //Aynı Kategori var mı yok mu bunu kontrol et
+            //Aynı Owner var mı yok mu bunu kontrol et
             var owners = _ownerRepository.GetOwners()
                  .Where(c => c.Name.Trim().ToUpper() == ownerCreate.Name.TrimEnd().ToUpper())
                  .FirstOrDefault();
@@ -115,6 +115,47 @@ namespace SuperPokemonAPI.Controllers
             }
 
             return Ok("Successfully created a Owner");
+        }
+
+        [HttpPut("{ownerId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDto updatedOwner)
+        {
+            if (updatedOwner == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (ownerId != updatedOwner.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Owner var mı yok mu kontrollü
+            if (!_ownerRepository.OwnerExists(ownerId))
+            {
+                return NotFound();
+            }
+
+            //DataAnnotations kontrolü
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var ownerMap = _mapper.Map<Owner>(updatedOwner);
+
+            if (!_ownerRepository.UpdateOwner(ownerMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while updating the owner");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+
         }
     }
 }
