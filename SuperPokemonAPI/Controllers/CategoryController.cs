@@ -159,5 +159,33 @@ namespace SuperPokemonAPI.Controllers
             return NoContent(); 
 
         }
+
+        [HttpDelete("{categoryId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult DeleteCategory(int categoryId)
+        {
+            if(!_categoryRepository.CategoryExists(categoryId))
+            {
+                return NotFound();
+            }
+
+            var categoryToDelete = _categoryRepository.GetCategory(categoryId);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_categoryRepository.DeleteCategory(categoryToDelete))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while deleting the category");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent(); 
+        }
     }
  }

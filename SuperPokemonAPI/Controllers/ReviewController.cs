@@ -17,7 +17,7 @@ namespace SuperPokemonAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IPokemonRepository _pokemonRepository;
         private readonly IReviewerRepository _reviewerRepository;
-        public ReviewController(IReviewRepository reviewRepository , IMapper mapper, IPokemonRepository pokemonRepository , IReviewerRepository reviewerRepository)
+        public ReviewController(IReviewRepository reviewRepository, IMapper mapper, IPokemonRepository pokemonRepository, IReviewerRepository reviewerRepository)
         {
             _mapper = mapper;
             _reviewRepository = reviewRepository;
@@ -78,7 +78,7 @@ namespace SuperPokemonAPI.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateReview([FromQuery] int reviewerId , [FromQuery] int pokeId , [FromBody] ReviewDto reviewCreate)
+        public IActionResult CreateReview([FromQuery] int reviewerId, [FromQuery] int pokeId, [FromBody] ReviewDto reviewCreate)
         {
             if (reviewCreate == null)
             {
@@ -159,5 +159,61 @@ namespace SuperPokemonAPI.Controllers
             return NoContent();
 
         }
+
+        [HttpDelete("{reviewId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult DeleteReview(int reviewId)
+        {
+            if (!_reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
+
+            var reviewToDelete = _reviewRepository.GetReview(reviewId);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_reviewRepository.DeleteReview(reviewToDelete))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while deleting the review");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        //[HttpDelete("/DeleteReviewsByReviewer/{reviewerId}")]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(204)]
+        //[ProducesResponseType(404)]
+
+        //public IActionResult DeleteReviewsByReviewer(int reviewerId)
+        //{
+        //    if (!_reviewerRepository.ReviewerExists(reviewerId))
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var reviewsToDelete = _reviewRepository.GetReviewsByReviewer(reviewerId).ToList();
+
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    if (!_reviewRepository.DeleteReviews(reviewsToDelete))
+        //    {
+        //        ModelState.AddModelError("Name", "Something went wrong while deleting the reviews");
+        //        return StatusCode(500, ModelState);
+        //    }
+
+        //    return NoContent();
+        //}
     }
 }
