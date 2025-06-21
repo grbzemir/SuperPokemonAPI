@@ -118,5 +118,46 @@ namespace SuperPokemonAPI.Controllers
 
             return Ok("Successfully created a category");
         }
+
+        [HttpPut("categoryId")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto updatedCategory)
+        {
+            if(updatedCategory == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if(categoryId != updatedCategory.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Kategori var mı yok mu kontrollü
+            if(!_categoryRepository.CategoryExists(categoryId))
+            {
+                return NotFound();
+            }
+
+            //DataAnnotations kontrolü
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoryMap = _mapper.Map<Category>(updatedCategory);
+
+            if (!_categoryRepository.UpdateCategory(categoryMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while updating the category");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent(); 
+
+        }
     }
  }
