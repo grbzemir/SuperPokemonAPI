@@ -10,6 +10,8 @@ namespace SuperPokemonAPI.Interfaces
         decimal GetPokemonRating(int pokeId);
         bool PokemonExists(int pokeId);
         bool CreatePokemon(int OwnerId , int categoryId , Pokemon pokemon);
+        bool UpdatePokemon(int OwnerId , int categoryId , Pokemon pokemon);
+
         bool Save();
 
 
