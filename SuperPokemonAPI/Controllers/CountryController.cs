@@ -113,5 +113,46 @@ namespace SuperPokemonAPI.Controllers
 
             return Ok("Successfully created a Country");
         }
+
+        [HttpPut("countryId")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+
+        public IActionResult UpdateCountry(int countryId, [FromBody] CountryDto updatedCountry)
+        {
+            if (updatedCountry == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (countryId != updatedCountry.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            //Kategori var mı yok mu kontrollü
+            if (!_countryRepository.CountryExists(countryId))
+            {
+                return NotFound();
+            }
+
+            //DataAnnotations kontrolü
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var countryMap = _mapper.Map<Country>(updatedCountry);
+
+            if (!_countryRepository.UpdateCountry(countryMap))
+            {
+                ModelState.AddModelError("Name", "Something went wrong while updating the category");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+
+        }
     }
 }
