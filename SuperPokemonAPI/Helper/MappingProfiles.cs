@@ -17,7 +17,9 @@ namespace SuperPokemonAPI.Helper
             CreateMap<Owner, OwnerDto>();
             CreateMap<OwnerDto, Owner>();
             CreateMap<Review, ReviewDto>();
-            CreateMap<Reviewer, ReviewerDto>();       
+            CreateMap<ReviewDto, Review>();
+            CreateMap<Reviewer, ReviewerDto>();
+            CreateMap<ReviewerDto, Reviewer>();
         }
     }
 }
